@@ -3,57 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ليلتي - حجز المصورين</title>
+    <title>ليلتي - حجز المصورين ✨</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <style>
         :root { --pink: #D2617C; --bg: #F9FAFB; }
         body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 20px; }
+        
         .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; font-weight: 800; }
         
         .grid { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.05); cursor: pointer; }
-        .img-wrapper { width: 100%; height: 140px; background: #eee; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #eee; transition: 0.2s; }
+        .card:active { transform: scale(0.96); }
+        
+        .img-wrapper { width: 100%; height: 150px; background: #f0f0f0; position: relative; }
         .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .img-wrapper::after { content: '📸'; position: absolute; bottom: 8px; right: 8px; background: rgba(255,255,255,0.9); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
         .info { padding: 10px; text-align: center; }
         .name { font-size: 13px; font-weight: 800; color: #333; }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
-        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
-        .btn-confirm { background: var(--pink); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
-        .pay-box { background: #fff3f5; border: 1px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 13px; }
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; align-items: flex-end; backdrop-filter: blur(3px); }
+        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
+        
+        .btn-confirm { background: var(--pink); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 800; font-size: 16px; margin-top: 15px; cursor: pointer; }
+        .btn-confirm:disabled { background: #ccc; }
+        
+        .pay-box { background: #fffcfd; border: 1.5px dashed var(--pink); padding: 18px; border-radius: 15px; margin: 15px 0; font-size: 14px; line-height: 1.6; }
+        .pay-box b { color: var(--pink); font-size: 16px; }
+
+        input[type="tel"] { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1.5px solid #eee; font-family: 'Tajawal'; font-size: 17px; text-align: center; outline: none; box-sizing: border-box; }
+        input[type="tel"]:focus { border-color: var(--pink); }
     </style>
 </head>
 <body>
 
-    <div class="header"><h1>أفضل مصوري الأفراح (Photographers) ✨</h1></div>
-    
+    <div class="header"><h1>أفضل مصوري الأفراح ✨</h1></div>
     <div class="grid" id="photo-list"></div>
 
     <div id="bookingModal" class="modal">
         <div class="modal-content">
             <h2 id="m-title" style="color:var(--pink); margin:0;"></h2>
-            <p id="m-desc" style="font-size:14px; color:#444; margin: 10px 0;"></p>
             
             <div id="step-1">
-                <p style="font-size:13px; color:#777;">* يشمل الحجز تصوير السيشن والفرح وتسليم الصور المعدلة.</p>
-                <button class="btn-confirm" onclick="showStep2()">حجز موعد التصوير (عربون 200 ج.م)</button>
+                <p id="m-desc" style="font-size:14px; color:#444; line-height:1.5; margin: 15px 0; padding: 12px; background: #f9f9f9; border-radius: 10px;"></p>
+                <p style="font-size:12px; color:#777; margin-bottom: 15px;">* يشمل الحجز تصوير السيشن والفرح وتسليم الصور المعدلة بالكامل.</p>
+                <button class="btn-confirm" onclick="showStep2()">حجز موعد التصوير (عربون 200 ج)</button>
             </div>
 
             <div id="step-2" style="display:none;">
                 <div class="pay-box">
-                    يرجى تحويل مبلغ <b>200 ج.م</b> عربون تأكيد حجز الموعد.<br>
+                    عربون تأكيد حجز الموعد: <b>200 ج.م</b><br>
                     فودافون كاش: <b>010XXXXXXXX</b><br>
                     إينستا باي: <b>laylati@instapay</b>
                 </div>
-                <label style="font-size:13px; font-weight:bold;">ارفعي صورة إيصال التحويل:</label>
-                <input type="file" id="receiptFile" accept="image/*" style="width:100%; margin:10px 0;">
-                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">إرسال للمراجعة ✅</button>
+                <label style="font-size:13px; font-weight:bold;">رقم المحفظة المحول منها:</label>
+                <input type="tel" id="senderPhone" placeholder="01xxxxxxxxx" maxlength="11">
+                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">إرسال بيانات الحجز ✅</button>
             </div>
             
-            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#999; margin-top:10px;">إغلاق</button>
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#bbb; margin-top:15px; font-weight: bold;">إغلاق</button>
         </div>
     </div>
 
@@ -62,18 +76,17 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // قائمة الـ 10 مصورين من ملفات "ليلتي"
         const photographers = [
-            { id: "P01", n: "Ahmed Rageb", d: "خبير تصوير الأفراح والسيشنات الخارجية بأحدث الكاميرات." },
-            { id: "P02", n: "Antikka Photography", d: "لمسات فنية كلاسيكية توثق أجمل لحظات العمر." },
-            { id: "P03", n: "Karim Moussa", d: "متخصص في التقاط اللحظات العفوية والمؤثرة في الأفراح." },
-            { id: "P04", n: "Mo’men El-Shorbagy", d: "تصوير سينمائي وفوتوغرافي متكامل لليلة الزفاف." },
-            { id: "P05", n: "Farah Photography", d: "خبيرة في تصوير تفاصيل العروسة والسيشن الداخلي." },
-            { id: "P06", n: "Bebato Photography", d: "أقوى عروض تصوير الأفراح في الإسكندرية بجودة عالمية." },
-            { id: "P07", n: "Yahia El-Gendy", d: "تصوير احترافي واهتمام فائق بتعديل الصور (Edits)." },
-            { id: "P08", n: "Omar El-Sayed", d: "مبدع في تصوير الزفات والقاعات بإضاءات احترافية." },
-            { id: "P09", n: "Hossam Abbas", d: "خبرة سنوات في توثيق حفلات الزفاف الكبرى بفنادق الإسكندرية." },
-            { id: "P10", n: "Mera Studio", d: "استوديو متكامل لتصوير العرائس بأحدث الصيحات." }
+            { id: "P01", n: "Ahmed Rageb", d: "خبير تصوير الأفراح والسيشنات الخارجية بأحدث الكاميرات وتقنيات الإضاءة." },
+            { id: "P02", n: "Antikka Photography", d: "لمسات فنية كلاسيكية توثق أجمل لحظات العمر بأسلوب الأنتيكا الراقي." },
+            { id: "P03", n: "Karim Moussa", d: "متخصص في التقاط اللحظات العفوية والمؤثرة في الأفراح بشكل سينمائي." },
+            { id: "P04", n: "Mo’men El-Shorbagy", d: "تصوير احترافي متكامل لليلة الزفاف بأعلى جودة وتعديل ألوان متميز." },
+            { id: "P05", n: "Farah Photography", d: "خبيرة في تصوير تفاصيل العروسة والسيشنات الهادئة بلمسات أنثوية." },
+            { id: "P06", n: "Bebato Photography", d: "أقوى عروض تصوير الأفراح في الإسكندرية مع تسليم سريع للصور." },
+            { id: "P07", n: "Yahia El-Gendy", d: "تصوير احترافي واهتمام فائق بتفاصيل الكادر وتعديل الصور (Creative Edits)." },
+            { id: "P08", n: "Omar El-Sayed", d: "مبدع في تصوير الزفات والقاعات الكبيرة وتغطية الفعاليات الضخمة." },
+            { id: "P09", n: "Hossam Abbas", d: "خبرة سنوات في توثيق حفلات الزفاف بفنادق الإسكندرية الكبرى." },
+            { id: "P10", n: "Mera Studio", d: "استوديو متكامل لتصوير العرائس بأحدث المعدات وصيحات التصوير العالمية." }
         ];
 
         let selectedPhoto = null;
@@ -91,7 +104,7 @@
                 document.getElementById('bookingModal').style.display = 'flex';
             };
             card.innerHTML = `
-                <div class="img-wrapper"><img src="https://via.placeholder.com/300x350?text=${p.n}"></div>
+                <div class="img-wrapper"><img src="https://via.placeholder.com/300x400?text=${encodeURIComponent(p.n)}"></div>
                 <div class="info"><span class="name">${p.n}</span></div>
             `;
             list.appendChild(card);
@@ -101,34 +114,35 @@
         function showStep2() { document.getElementById('step-1').style.display = 'none'; document.getElementById('step-2').style.display = 'block'; }
 
         async function processBooking() {
-            const file = document.getElementById('receiptFile').files[0];
-            const phone = localStorage.getItem('loggedPhone');
+            const senderPhone = document.getElementById('senderPhone').value.trim();
+            const customerPhone = localStorage.getItem('loggedPhone');
             const btn = document.getElementById('finalBtn');
 
-            if (!phone) { alert("من فضلك سجلي دخول أولاً"); return; }
-            if (!file) { alert("ارفعي صورة الإيصال"); return; }
+            if (!customerPhone) { alert("من فضلكِ سجلي دخولك أولاً"); return; }
+            if (senderPhone.length < 11) { alert("اكتبي رقم محفظة صحيح"); return; }
 
             btn.disabled = true;
-            btn.innerText = "جاري المعالجة...";
+            btn.innerText = "جاري الإرسال...";
 
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                try {
-                    await db.collection("pending_payments").add({
-                        partnerId: selectedPhoto.id,
-                        partnerName: selectedPhoto.n,
-                        customerPhone: phone,
-                        receiptBase64: reader.result,
-                        type: "فوتوغرافير",
-                        status: "انتظار مراجعة الموظف",
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    alert("تم إرسال طلبك! الموظف هيراجع الإيصال ويأكد حجز المصور.");
-                    closeModal();
-                } catch (e) { alert("خطأ: " + e.message); }
-                finally { btn.disabled = false; btn.innerText = "إرسال للمراجعة ✅"; }
-            };
+            try {
+                await db.collection("pending_payments").add({
+                    partnerId: selectedPhoto.id,
+                    partnerName: selectedPhoto.n,
+                    customerPhone: customerPhone,
+                    transferFrom: senderPhone,
+                    type: "فوتوغرافير",
+                    amount: 200,
+                    status: "انتظار مراجعة الموظف",
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("تم إرسال طلبك! الموظف هيراجع التحويل ويأكد حجز المصور معاكي.");
+                closeModal();
+            } catch (e) { 
+                alert("خطأ: " + e.message); 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerText = "إرسال بيانات الحجز ✅"; 
+            }
         }
     </script>
 </body>
