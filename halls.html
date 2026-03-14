@@ -3,146 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ليلتي - حجز القاعات</title>
+    <title>ليلتي - حجز القاعات ✨</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
-        :root { --pink: #D2617C; --bg: #F9FAFB; }
+        :root { --pink: #D2617C; --bg: #F9FAFB; --dark: #333; }
         body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 20px; }
+        
         .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; font-weight: 800; }
         
         .halls-grid { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .hall-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.05); cursor: pointer; }
-        .img-wrapper { width: 100%; height: 110px; background: #eee; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .hall-info { padding: 8px; text-align: center; }
-        .hall-name { font-size: 12px; font-weight: 800; color: #333; }
-
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
-        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
-        .btn-confirm { background: var(--pink); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
-        .btn-confirm:disabled { background: #ccc; }
+        .hall-card { background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.06); cursor: pointer; transition: 0.3s; border: 1px solid #eee; }
+        .hall-card:active { transform: scale(0.95); }
         
-        .pay-box { background: #fff3f5; border: 1px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 13px; }
+        .img-wrapper { width: 100%; height: 110px; background: #f0f0f0; position: relative; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .img-wrapper::after { content: '📍'; position: absolute; bottom: 5px; right: 5px; background: white; border-radius: 50%; padding: 2px; font-size: 10px; }
+
+        .hall-info { padding: 10px; text-align: center; }
+        .hall-name { font-size: 13px; font-weight: 800; color: var(--dark); display: block; margin-bottom: 4px; }
+        .hall-location { font-size: 11px; color: #888; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: flex-end; backdrop-filter: blur(4px); }
+        .modal-content { background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+        
+        .btn-confirm { background: var(--pink); color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-weight: 800; font-size: 16px; margin-top: 15px; cursor: pointer; transition: 0.3s; }
+        .btn-confirm:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .pay-box { background: #fff8f9; border: 1px dashed var(--pink); padding: 18px; border-radius: 15px; margin: 15px 0; font-size: 14px; line-height: 1.6; color: #555; }
+        .pay-box b { color: var(--pink); font-size: 16px; }
+
+        input[type="tel"] { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1.5px solid #eee; font-family: 'Tajawal'; font-size: 16px; text-align: center; outline: none; box-sizing: border-box; }
+        input[type="tel"]:focus { border-color: var(--pink); background: #fffcfd; }
     </style>
 </head>
 <body>
 
     <div class="header"><h1>قاعات الإسكندرية ✨</h1></div>
-    <div class="halls-grid" id="halls-list"></div>
+    
+    <div class="halls-grid" id="halls-list">
+        </div>
 
     <div id="bookingModal" class="modal">
         <div class="modal-content">
-            <h2 id="m-title" style="color:var(--pink); margin:0;"></h2>
-            <p id="m-address" style="font-size:12px; color:#777;"></p>
+            <h2 id="m-title" style="color:var(--pink); margin:0; font-size: 22px;"></h2>
+            <p id="m-address" style="font-size:13px; color:#777; margin: 5px 0 15px 0;"></p>
             
             <div id="step-1">
-                <p id="m-desc" style="font-size:14px; color:#444; line-height:1.5;"></p>
+                <p id="m-desc" style="font-size:15px; color:#444; line-height:1.6; background: #f9f9f9; padding: 15px; border-radius: 12px;"></p>
                 <button class="btn-confirm" onclick="showStep2()">حجز ودفع العربون</button>
             </div>
 
             <div id="step-2" style="display:none;">
                 <div class="pay-box">
-                    تحويل مبلغ <b>500 ج.م</b> عربون حجز.<br>
+                    يرجى تحويل مبلغ <b>500 ج.م</b> عربون حجز.<br>
                     فودافون كاش: <b>010XXXXXXXX</b><br>
                     إينستا باي: <b>laylati@instapay</b>
                 </div>
-                <label style="font-size:13px; font-weight:bold;">ارفقي صورة الإيصال (ScreenShot):</label>
-                <input type="file" id="receiptFile" accept="image/*" style="width:100%; margin:10px 0;">
-                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">إرسال الإيصال للمراجعة ✅</button>
+                
+                <label style="font-size:14px; font-weight:700; color: #333;">اكتبي رقم المحفظة اللي حولتي منه:</label>
+                <input type="tel" id="senderPhone" placeholder="01xxxxxxxxx" maxlength="11">
+                
+                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">تأكيد بيانات التحويل ✅</button>
+                <p style="text-align: center; font-size: 11px; color: #999; margin-top: 10px;">سيتم مراجعة العملية وتأكيد الحجز خلال دقائق.</p>
             </div>
             
-            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#999; margin-top:10px;">إغلاق</button>
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#bbb; margin-top:15px; font-family: 'Tajawal'; font-weight: bold;">إلغاء</button>
         </div>
     </div>
 
     <script>
+        // تهيئة Firebase
         const firebaseConfig = { projectId: "gggg-4cab7" };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         const halls = [
-            { id: "h01", n: "Safir Halls", a: "وسط الإسكندرية", d: "من أشهر قاعات وسط المدينة." },
-            { id: "h02", n: "حفلات اكاسيا - Acacia", a: "ستانلي", d: "إطلالة مباشرة على كوبري ستانلي." },
-            { id: "h03", n: "Royal Lamour Elite", a: "سموحة", d: "فخامة داخل نادي سموحة." },
-            { id: "h04", n: "Royal Hall", a: "الإبراهيمية", d: "مساحة واسعة ومنتظمة." },
-            { id: "h05", n: "Royal Lamour Paradise", a: "سيدي جابر", d: "ديكورات عصرية للأفراح." },
-            { id: "h06", n: "Royal Lamour Downtown", a: "محرم بك", d: "تنظيم ممتاز وتقييم عالي." },
-            { id: "h07", n: "Royal Lamour Classic", a: "عزبة شركس", d: "أجواء كلاسيكية ساحرة." },
-            { id: "h08", n: "Alexmoon Venue", a: "نادي المعلمين", d: "إطلالة بحرية متميزة." },
-            { id: "h09", n: "La Vienna Venue", a: "سيدي جابر", d: "هدوء وخدمة راقية." },
-            { id: "h10", n: "Royal Hall - Ras El Tin", a: "الأنفوشي", d: "قاعة عريقة بجودة عالية." },
-            { id: "h11", n: "قاعة الزهراء", a: "عزبة النزهة", d: "مناسبة جداً للأفراح العائلية." },
-            { id: "h12", n: "Four Seasons San Stefano", a: "سان ستيفانو", d: "الفخامة المطلقة في الإسكندرية." },
-            { id: "h13", n: "Hilton Green Plaza", a: "سموحة", d: "تجربة فندقية عالمية." },
-            { id: "h14", n: "Hilton Corniche", a: "طريق الجيش", d: "إطلالة بانورامية على البحر." },
-            { id: "h15", n: "جراند بلازا - اللؤلؤة", a: "سموحة", d: "قاعات فندقية أنيقة." },
-            { id: "h16", n: "Palm Hotel - الماسة", a: "مصطفى كامل", d: "خدمة احترافية وديكور مميز." },
-            { id: "h17", n: "ماجيستي - رويال جويل", a: "محطة الرمل", d: "رقي داخل فندق رويال جويل." },
-            { id: "h18", n: "Grand Palace", a: "المعمورة", d: "مجمع قاعات فخم شرق المدينة." },
-            { id: "h19", n: "قاعات السكري", a: "المحمودية", d: "ديكورات حديثة وخدمة متميزة." },
-            { id: "h20", n: "Ramses Halls", a: "شارع فؤاد", d: "تاريخ وفخامة في وسط البلد." },
-            { id: "h21", n: "قاعة كريستال", a: "جراند بلازا", d: "أحدث أنظمة الإضاءة والصوت." },
-            { id: "h22", n: "Ocean Venue", a: "الكورنيش", d: "أجواء البحر في ليلة العمر." },
-            { id: "h23", n: "Diamond Hall", a: "السيوف", d: "تصميمات عصرية ومساحات واسعة." },
-            { id: "h24", n: "Star Night", a: "العجمي", d: "أفضل قاعات غرب الإسكندرية." },
-            { id: "h25", n: "Golden Rose", a: "لوران", d: "قاعة راقية للمناسبات الخاصة." }
+            { id: "h01", n: "Safir Halls", a: "وسط الإسكندرية", d: "من أشهر قاعات وسط المدينة، تتميز بديكورات فاخرة وخدمة فندقية." },
+            { id: "h02", n: "حفلات اكاسيا - Acacia", a: "ستانلي", d: "إطلالة مباشرة على كوبري ستانلي، مثالية للأفراح الخارجية (Outdoor)." },
+            { id: "h03", n: "Royal Lamour Elite", a: "سموحة", d: "فخامة داخل نادي سموحة، مساحات واسعة وتجهيزات إضاءة حديثة." },
+            { id: "h04", n: "Royal Hall", a: "الإبراهيمية", d: "مساحة واسعة ومنتظمة تناسب الأعداد الكبيرة." },
+            { id: "h05", n: "Royal Lamour Paradise", a: "سيدي جابر", d: "ديكورات عصرية للأفراح الشبابية المبهجة." },
+            { id: "h06", n: "Royal Lamour Downtown", a: "محرم بك", d: "تنظيم ممتاز وتقييم عالي من جميع العرائس." },
+            { id: "h07", n: "Royal Lamour Classic", a: "عزبة شركس", d: "أجواء كلاسيكية ساحرة لليلة عمر ملكية." },
+            { id: "h08", n: "Alexmoon Venue", a: "نادي المعلمين", d: "إطلالة بحرية متميزة وهواء نقي." },
+            { id: "h09", n: "La Vienna Venue", a: "سيدي جابر", d: "هدوء وخدمة راقية في قلب الإسكندرية." },
+            { id: "h10", n: "Ras El Tin Hall", a: "الأنفوشي", d: "قاعة عريقة بجودة عالية وإطلالة تاريخية." },
+            { id: "h11", n: "قاعة الزهراء", a: "عزبة النزهة", d: "مناسبة جداً للأفراح العائلية والكتب الكتاب." },
+            { id: "h12", n: "Four Seasons", a: "سان ستيفانو", d: "الفخامة المطلقة والخدمة العالمية لليلة لا تنسى." }
         ];
 
         let selectedHall = null;
 
+        // عرض القاعات في الشبكة
         const list = document.getElementById('halls-list');
         halls.forEach(h => {
             const card = document.createElement('div');
             card.className = 'hall-card';
-            card.onclick = () => {
-                selectedHall = h;
-                document.getElementById('m-title').innerText = h.n;
-                document.getElementById('m-address').innerText = "📍 " + h.a;
-                document.getElementById('m-desc').innerText = h.d;
-                document.getElementById('step-1').style.display = 'block';
-                document.getElementById('step-2').style.display = 'none';
-                document.getElementById('bookingModal').style.display = 'flex';
-            };
-            card.innerHTML = `<div class="img-wrapper"><img src="https://via.placeholder.com/300x200?text=${h.n}"></div><div class="hall-info"><span class="hall-name">${h.n}</span></div>`;
+            card.onclick = () => openModal(h);
+            card.innerHTML = `
+                <div class="img-wrapper"><img src="https://via.placeholder.com/300x200?text=${h.n}"></div>
+                <div class="hall-info">
+                    <span class="hall-name">${h.n}</span>
+                    <span class="hall-location">📍 ${h.a}</span>
+                </div>`;
             list.appendChild(card);
         });
 
-        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
-        function showStep2() { document.getElementById('step-1').style.display = 'none'; document.getElementById('step-2').style.display = 'block'; }
+        function openModal(h) {
+            selectedHall = h;
+            document.getElementById('m-title').innerText = h.n;
+            document.getElementById('m-address').innerText = "📍 " + h.a;
+            document.getElementById('m-desc').innerText = h.d;
+            document.getElementById('step-1').style.display = 'block';
+            document.getElementById('step-2').style.display = 'none';
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
 
+        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
+        
+        function showStep2() { 
+            document.getElementById('step-1').style.display = 'none'; 
+            document.getElementById('step-2').style.display = 'block'; 
+        }
+
+        // دالة الحجز الأساسية (بدون صور)
         async function processBooking() {
-            const file = document.getElementById('receiptFile').files[0];
-            const phone = localStorage.getItem('loggedPhone');
+            const senderPhone = document.getElementById('senderPhone').value.trim();
+            const customerPhone = localStorage.getItem('loggedPhone'); // تأكد إنك مخزن رقم العروسة عند اللوجن
             const btn = document.getElementById('finalBtn');
 
-            if (!phone) { alert("سجلي دخول الأول"); return; }
-            if (!file) { alert("ارفعي صورة الإيصال"); return; }
+            if (!customerPhone) { alert("من فضلك سجلي دخولك للتطبيق أولاً"); return; }
+            if (senderPhone.length < 11) { alert("يرجى إدخال رقم محفظة صحيح مكون من 11 رقم"); return; }
 
             btn.disabled = true;
-            btn.innerText = "جاري معالجة الصورة...";
+            btn.innerText = "جاري إرسال البيانات...";
 
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                try {
-                    await db.collection("pending_payments").add({
-                        hallId: selectedHall.id,
-                        hallName: selectedHall.n,
-                        customerPhone: phone,
-                        receiptBase64: reader.result,
-                        status: "انتظار مراجعة الموظف",
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    alert("تم إرسال طلبك! الموظف هيراجع الإيصال ويأكد حجزك.");
-                    closeModal();
-                } catch (e) { alert("خطأ: " + e.message); }
-                finally { btn.disabled = false; btn.innerText = "إرسال الإيصال للمراجعة ✅"; }
-            };
+            try {
+                // حفظ البيانات في كولكشن الدفع الملحق بالموظف
+                await db.collection("pending_payments").add({
+                    hallId: selectedHall.id,
+                    hallName: selectedHall.n,
+                    customerPhone: customerPhone,
+                    transferFrom: senderPhone, // الرقم اللي العروسة حولت منه
+                    amount: 500,
+                    status: "انتظار مراجعة الموظف",
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert("✅ تم إرسال بيانات التحويل بنجاح! سيقوم فريق ليلتي بمراجعة المبلغ وتأكيد حجز القاعة معكِ هاتفياً.");
+                closeModal();
+                document.getElementById('senderPhone').value = ""; // تفريغ الخانة
+
+            } catch (e) {
+                alert("❌ حدث خطأ: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "إرسال الإيصال للمراجعة ✅";
+            }
         }
     </script>
 </body>
