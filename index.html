@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ليلتي - تسجيل الدخول</title>
+    <style>
+        :root { --primary-color: #d81b60; --secondary-color: #fce4ec; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--secondary-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #fff; padding: 2.5rem; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .logo { width: 100px; height: 100px; margin-bottom: 1rem; border-radius: 50%; border: 3px solid var(--primary-color); }
+        h2 { color: var(--primary-color); margin-bottom: 1.5rem; }
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group svg { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; fill: var(--primary-color); }
+        input { width: 100%; padding: 12px 45px 12px 15px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px; }
+        button { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 10px; }
+        .toggle-link { margin-top: 20px; display: block; color: #880e4f; cursor: pointer; font-weight: 600; }
+        #msg { margin-top: 15px; font-weight: bold; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="1.png" alt="Logo" class="logo">
+        
+        <div id="loginSection">
+            <h2>تسجيل الدخول</h2>
+            <div class="input-group">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                <input type="tel" id="loginPhone" placeholder="رقم الموبايل">
+            </div>
+            <div class="input-group">
+                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                <input type="password" id="loginPass" placeholder="كلمة السر">
+            </div>
+            <button id="btnLogin">دخول</button>
+            <span class="toggle-link" onclick="toggleForm()">إنشاء حساب جديد</span>
+        </div>
+
+        <div id="signupSection" class="hidden">
+            <h2>حساب جديد</h2>
+            <div class="input-group">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <input type="text" id="regName" placeholder="الاسم بالكامل">
+            </div>
+            <div class="input-group">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                <input type="tel" id="regPhone" placeholder="رقم الموبايل">
+            </div>
+            <div class="input-group">
+                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                <input type="password" id="regPass" placeholder="كلمة السر">
+            </div>
+            <button id="btnSignup">إنشاء الحساب</button>
+            <span class="toggle-link" onclick="toggleForm()">لديك حساب بالفعل؟ سجل دخول</span>
+        </div>
+        <p id="msg"></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+        // --- 1. التحقق الفوري (قبل أي حاجة) ---
+        if (localStorage.getItem('loggedPhone')) {
+            window.location.href = "inde.html";
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXLzoTGPV7uvmstWrXU8F3U7dZy1VCY2k",
+            authDomain: "gggg-4cab7.firebaseapp.com",
+            projectId: "gggg-4cab7",
+            storageBucket: "gggg-4cab7.firebasestorage.app",
+            messagingSenderId: "51351904886",
+            appId: "1:51351904886:web:e71724e6bbd2837f333557"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const msg = document.getElementById('msg');
+
+        window.toggleForm = () => {
+            document.getElementById('loginSection').classList.toggle('hidden');
+            document.getElementById('signupSection').classList.toggle('hidden');
+            msg.innerText = "";
+        };
+
+        // تسجيل الدخول مع حفظ الجلسة
+        document.getElementById('btnLogin').addEventListener('click', async () => {
+            const phone = document.getElementById('loginPhone').value;
+            const pass = document.getElementById('loginPass').value;
+
+            try {
+                const q = query(collection(db, "users"), where("phoneNumber", "==", phone), where("password", "==", pass));
+                const snap = await getDocs(q);
+
+                if (!snap.empty) {
+                    // --- 2. حفظ الرقم في ذاكرة المتصفح ---
+                    localStorage.setItem('loggedPhone', phone);
+                    window.location.href = "inde.html";
+                } else {
+                    msg.innerText = "بيانات غلط!";
+                    msg.style.color = "red";
+                }
+            } catch (e) { console.error(e); }
+        });
+
+        // إنشاء حساب جديد
+        document.getElementById('btnSignup').addEventListener('click', async () => {
+            const name = document.getElementById('regName').value;
+            const phone = document.getElementById('regPhone').value;
+            const pass = document.getElementById('regPass').value;
+
+            try {
+                const q = query(collection(db, "users"), where("phoneNumber", "==", phone));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    await addDoc(collection(db, "users"), { fullName: name, phoneNumber: phone, password: pass });
+                    // بعد التسجيل بنحفظه برضه عشان ميسجلش دخول تاني
+                    localStorage.setItem('loggedPhone', phone);
+                    window.location.href = "inde.html";
+                } else {
+                    msg.innerText = "الرقم مسجل فعلاً!";
+                }
+            } catch (e) { console.error(e); }
+        });
+    </script>
+</body>
+</html>

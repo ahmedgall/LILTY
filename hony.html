@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ليلتي - عروض شهر العسل</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        :root { --pink: #D2617C; --bg: #F9FAFB; }
+        body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 20px; }
+        .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
+        
+        .container { padding: 15px; }
+        .company-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); cursor: pointer; transition: 0.3s; border: 1px solid #eee; }
+        .company-card:active { transform: scale(0.98); }
+        
+        .img-wrapper { width: 100%; height: 200px; background: #eee; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .info { padding: 20px; text-align: center; }
+        .name { font-size: 18px; font-weight: 800; color: #333; margin-bottom: 10px; display: block; }
+        .tagline { font-size: 14px; color: var(--pink); font-weight: bold; margin-bottom: 15px; display: block; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
+        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
+        .btn-confirm { background: var(--pink); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 15px; cursor: pointer; font-size: 16px; }
+        .btn-confirm:disabled { background: #ccc; }
+        
+        .pay-box { background: #fff3f5; border: 1px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 14px; line-height: 1.7; }
+        .offer-details { background: #fdfdfd; padding: 15px; border-radius: 12px; border: 1px solid #f0f0f0; margin-top: 10px; font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="header"><h1>عروض شهر العسل ✨</h1></div>
+
+    <div class="container" id="company-list">
+        <div class="company-card" onclick="openBooking()">
+            <div class="img-wrapper">
+                <img src="https://via.placeholder.com/600x400?text=Honeymoon+Travel" alt="شركة سياحة">
+            </div>
+            <div class="info">
+                <span class="name">شركة "لا فيدا" للسياحة (La Vida Travel)</span>
+                <span class="tagline">رحلات شهر عسل خيالية داخل وخارج مصر ✈️</span>
+                <p style="font-size: 13px; color: #777;">اضغط لعرض تفاصيل الرحلات وطرق الحجز</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <h2 id="m-title" style="color:var(--pink); margin:0;">La Vida Travel</h2>
+            <p style="font-size:12px; color:#777; margin-bottom:15px;">📍 فرع الإسكندرية / سموحة</p>
+            
+            <div id="step-1">
+                <div class="offer-details">
+                    <b>أبرز العروض المتاحة:</b>
+                    <ul style="padding-right: 20px; margin-top: 10px;">
+                        <li>رحلة جزر المالديف (5 أيام) - إقامة كاملة</li>
+                        <li>رحلة شرم الشيخ والجونة (أسبوع العسل)</li>
+                        <li>رحلات تركيا وأوروبا مخصصة للعرسان</li>
+                    </ul>
+                    <p style="margin-top: 10px; color: #333;">* يتم تحديد التفاصيل النهائية وموعد السفر مع ممثل الشركة بعد دفع عربون جدية الحجز.</p>
+                </div>
+                <button class="btn-confirm" onclick="showStep2()">حجز استشارة ودفع عربون (300 ج.م)</button>
+            </div>
+
+            <div id="step-2" style="display:none;">
+                <div class="pay-box">
+                    يرجى تحويل مبلغ <b>300 ج.م</b> عربون جدية حجز.<br>
+                    فودافون كاش: <b>010XXXXXXXX</b><br>
+                    إينستا باي: <b>laylati@instapay</b>
+                </div>
+                <label style="font-size:13px; font-weight:bold;">ارفقي صورة إيصال التحويل (سكرين شوت):</label>
+                <input type="file" id="receiptFile" accept="image/*" style="width:100%; margin:10px 0;">
+                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">إرسال الإيصال وتأكيد الحجز ✅</button>
+            </div>
+            
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#999; margin-top:15px;">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Firebase Init
+        const firebaseConfig = { projectId: "gggg-4cab7" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // بيانات الشركة للـ Database
+        const companyId = "n01"; // N للـ Honeymoon
+        const companyName = "La Vida Travel";
+
+        function openBooking() {
+            document.getElementById('step-1').style.display = 'block';
+            document.getElementById('step-2').style.display = 'none';
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
+        function showStep2() { document.getElementById('step-1').style.display = 'none'; document.getElementById('step-2').style.display = 'block'; }
+
+        async function processBooking() {
+            const file = document.getElementById('receiptFile').files[0];
+            const phone = localStorage.getItem('loggedPhone');
+            const btn = document.getElementById('finalBtn');
+
+            if (!phone) { alert("من فضلك سجلي دخول أولاً"); return; }
+            if (!file) { alert("يجب رفع صورة الإيصال"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "جاري معالجة الإيصال...";
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                try {
+                    // تسجيل في جدول مراجعة الموظف
+                    await db.collection("pending_payments").add({
+                        partnerId: companyId,
+                        partnerName: companyName,
+                        customerPhone: phone,
+                        receiptBase64: reader.result,
+                        status: "انتظار مراجعة الموظف",
+                        type: "هاني مون",
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    alert("تم إرسال طلبك! الموظف هيراجع الإيصال ويتواصل معاكي لتنسيق رحلة الهاني مون.");
+                    closeModal();
+                } catch (e) { alert("خطأ: " + e.message); }
+                finally { btn.disabled = false; btn.innerText = "إرسال الإيصال وتأكيد الحجز ✅"; }
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ليلتي - مراكز التجميل (Beauty Centers)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        :root { --pink: #D2617C; --bg: #F9FAFB; }
+        body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 20px; }
+        .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
+        
+        .grid { padding: 15px; display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.05); cursor: pointer; display: flex; align-items: center; border: 1px solid #fff; }
+        .img-wrapper { width: 110px; height: 110px; background: #eee; flex-shrink: 0; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .info { padding: 15px; flex-grow: 1; }
+        .name { font-size: 15px; font-weight: 800; color: #333; display: block; margin-bottom: 5px; }
+        .desc { font-size: 12px; color: #777; line-height: 1.4; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
+        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
+        .btn-confirm { background: var(--pink); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; font-size: 16px; }
+        .pay-box { background: #fff3f5; border: 1px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 13px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <div class="header"><h1>مراكز التجميل والبيوتي سنتر ✨</h1></div>
+    
+    <div class="grid" id="beauty-list"></div>
+
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <h2 id="m-title" style="color:var(--pink); margin:0;"></h2>
+            <p id="m-desc" style="font-size:14px; color:#444; margin: 15px 0;"></p>
+            
+            <div id="step-1">
+                <p style="font-size:13px; color:#777;">* الحجز يشمل باقة العروسة المتكاملة (شعر ومكياج) أو اختيار خدمات منفصلة.</p>
+                <button class="btn-confirm" onclick="showStep2()">حجز موعد (عربون 200 ج.م)</button>
+            </div>
+
+            <div id="step-2" style="display:none;">
+                <div class="pay-box">
+                    يرجى تحويل مبلغ <b>200 ج.م</b> عربون تأكيد حجز الموعد.<br>
+                    فودافون كاش: <b>010XXXXXXXX</b><br>
+                    إينستا باي: <b>laylati@instapay</b>
+                </div>
+                <label style="font-size:13px; font-weight:bold;">ارفعي صورة الإيصال (ScreenShot):</label>
+                <input type="file" id="receiptFile" accept="image/*" style="width:100%; margin:10px 0;">
+                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">إرسال للمراجعة ✅</button>
+            </div>
+            
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#999; margin-top:15px;">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { projectId: "gggg-4cab7" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const centers = [
+            { id: "C01", n: "صالون محمد الصغير (Al Sagheer)", d: "الاسم الأشهر في عالم التجميل، باقات متكاملة للعروسة بأيدي محترفين." },
+            { id: "C02", n: "بيوتي سنتر بوسي اليماني", d: "متخصصون في أرقى لفات الطرح ومكياج العرايس بأحدث الصيحات العالمية." },
+            { id: "C03", n: "جاك ديسانج (Jacques Dessange)", d: "أرقى فنون تصفيف الشعر والعناية به لضمان إطلالة فرنسية ساحرة." },
+            { id: "C04", n: "صالون طارق مارينا", d: "خبرة واسعة في تجهيز العرايس، أحدث قصات الشعر وصبغات عالمية." },
+            { id: "C05", n: "ميسيو إدوارد (Monsieur Edouard)", d: "فخامة وأناقة في التعامل، باقات مخصصة للعرايس تشمل كل ما تحتاجينه." }
+        ];
+
+        let selectedCenter = null;
+        const list = document.getElementById('beauty-list');
+
+        centers.forEach(c => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => {
+                selectedCenter = c;
+                document.getElementById('m-title').innerText = c.n;
+                document.getElementById('m-desc').innerText = c.d;
+                document.getElementById('step-1').style.display = 'block';
+                document.getElementById('step-2').style.display = 'none';
+                document.getElementById('bookingModal').style.display = 'flex';
+            };
+            card.innerHTML = `
+                <div class="img-wrapper"><img src="https://via.placeholder.com/200x200?text=${c.n}"></div>
+                <div class="info">
+                    <span class="name">${c.n}</span>
+                    <span class="desc">${c.d}</span>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+
+        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
+        function showStep2() { document.getElementById('step-1').style.display = 'none'; document.getElementById('step-2').style.display = 'block'; }
+
+        async function processBooking() {
+            const file = document.getElementById('receiptFile').files[0];
+            const phone = localStorage.getItem('loggedPhone');
+            const btn = document.getElementById('finalBtn');
+
+            if (!phone) { alert("من فضلك سجلي دخول أولاً"); return; }
+            if (!file) { alert("ارفعي صورة الإيصال"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "جاري الإرسال...";
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                try {
+                    await db.collection("pending_payments").add({
+                        partnerId: selectedCenter.id,
+                        partnerName: selectedCenter.n,
+                        customerPhone: phone,
+                        receiptBase64: reader.result,
+                        type: "مركز تجميل",
+                        status: "انتظار مراجعة الموظف",
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    alert("تم الإرسال! الموظف هيراجع الإيصال ويأكد حجز الموعد.");
+                    closeModal();
+                } catch (e) { alert("خطأ: " + e.message); }
+                finally { btn.disabled = false; btn.innerText = "إرسال للمراجعة ✅"; }
+            };
+        }
+    </script>
+</body>
+</html>

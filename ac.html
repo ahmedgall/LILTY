@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ليلتي - الحساب الشخصي</title>
+    <style>
+     
+     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; border-radius: 20px 20px 0 0; }
+.nav-link { text-decoration: none; color: #bbb; display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: bold; flex: 1; }
+.nav-link svg { width: 24px; height: 24px; fill: currentColor; margin-bottom: 4px; }
+.nav-link.active { color: #D2617C; } /* اللون الوردي المعتمد */
+     
+     
+     :root {
+            --primary: #d81b60;
+            --accent: #ad1457;
+            --bg: #f8f9fa;
+            --white: #ffffff;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding-bottom: 90px;
+            color: var(--text);
+        }
+
+        /* رأس الصفحة السينمائي */
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3);
+        }
+
+        .profile-header h2 {
+            color: white;
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        /* حاوية المحتوى */
+        .container {
+            padding: 0 20px;
+            margin-top: -30px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+            display: block;
+            border-right: 3px solid var(--primary);
+            padding-right: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-label { font-size: 15px; color: #555; }
+        .info-value { font-weight: 600; color: var(--text); }
+
+        .btn-edit {
+            background: var(--bg);
+            color: var(--primary);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .logout-section {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn-logout {
+            background: none;
+            border: 2px solid #ff4b2b;
+            color: #ff4b2b;
+            padding: 12px 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        .btn-logout:hover {
+            background: #ff4b2b;
+            color: white;
+        }
+
+       
+
+
+/* تصميم شريط التنقل السفلي */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 15px rgba(0,0,0,0.08);
+    z-index: 1000;
+    border-radius: 20px 20px 0 0; /* انحناء بسيط من فوق يعطي شكل أشيك */
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #bbb; /* لون الأيقونات غير النشطة */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    transition: 0.3s;
+    flex: 1;
+}
+
+.nav-link svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor; /* عشان الأيقونة تاخد نفس لون النص */
+    margin-bottom: 4px;
+}
+
+/* حالة العنصر النشط */
+.nav-link.active {
+    color: #D2617C; /* اللون الوردي (الهوية) */
+}
+
+/* تأثير عند الضغط */
+.nav-link:active {
+    transform: scale(0.9);
+}
+
+/* إضافة مساحة في أسفل الصفحة عشان المحتوى ميختفيش ورا الناف بار */
+body {
+    padding-bottom: 75px;
+}
+
+
+
+    </style>
+</head>
+<body>
+
+    <div class="profile-header">
+        <h2>حسابي الشخصي</h2>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <span class="section-title">المعلومات الشخصية</span>
+            <div class="info-row">
+                <span class="info-label">الاسم</span>
+                <span class="info-value" id="userName">جاري التحميل...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">رقم الهاتف</span>
+                <span class="info-value" id="userPhone">---</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="section-title">الأمان والخصوصية</span>
+            <div class="info-row">
+                <span class="info-label">كلمة المرور</span>
+                <button class="btn-edit" onclick="changePass()">تغيير</button>
+            </div>
+            <div class="info-row">
+                <span class="info-label">حالة الحساب</span>
+                <span class="info-value" style="color: #4caf50;">نشط</span>
+            </div>
+        </div>
+
+        <div class="logout-section">
+            <button class="btn-logout" onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </div>
+
+
+<nav class="bottom-nav">
+    <a href="inde.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>الرئيسية</span>
+    </a>
+    <a href="hog.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+        <span>الحجوزات</span>
+    </a>
+    <a href="ac.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span>حسابي</span>
+    </a>
+</nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+        // إعدادات الفايربيس (نفس مشروعك gggg-4cab7)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDXLzoTGPV7uvmstWrXU8F3U7dZy1VCY2k",
+            authDomain: "gggg-4cab7.firebaseapp.com",
+            projectId: "gggg-4cab7",
+            storageBucket: "gggg-4cab7.firebasestorage.app",
+            messagingSenderId: "51351904886",
+            appId: "1:51351904886:web:e71724e6bbd2837f333557"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const phone = localStorage.getItem('loggedPhone');
+
+        async function fetchUserData() {
+            if(!phone) { window.location.href = "index.html"; return; }
+            
+            const q = query(collection(db, "users"), where("phoneNumber", "==", phone));
+            const snap = await getDocs(q);
+            
+            if(!snap.empty) {
+                const userDoc = snap.docs[0];
+                const data = userDoc.data();
+                document.getElementById('userName').innerText = data.fullName;
+                document.getElementById('userPhone').innerText = data.phoneNumber;
+                localStorage.setItem('currentUserId', userDoc.id);
+            }
+        }
+
+        window.changePass = async () => {
+            const newPass = prompt("أدخل كلمة السر الجديدة:");
+            if(newPass && newPass.length >= 6) {
+                const id = localStorage.getItem('currentUserId');
+                await updateDoc(doc(db, "users", id), { password: newPass });
+                alert("✅ تم تحديث كلمة السر");
+            } else if (newPass) {
+                alert("الكلمة قصيرة جداً!");
+            }
+        }
+
+        window.logout = () => {
+            if(confirm("هل تريد تسجيل الخروج؟")) {
+                localStorage.clear();
+                window.location.href = "index.html";
+            }
+        }
+
+        fetchUserData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,585 @@
+:root {
+    --pink-light: #FFD1DC;
+    --pink-mid: #FFB6C1;
+    --pink-dark: #D2617C;
+    --white-glass: rgba(255, 255, 255, 0.6);
+}
+
+body {
+    margin: 0;
+    font-family: 'Tajawal', sans-serif;
+    /* ألوان بناتي متداخلة (تدرج انسيابي) */
+    background: linear-gradient(135deg, #FFF0F5 0%, #FFD1DC 50%, #FFB6C1 100%);
+    background-attachment: fixed;
+    min-height: 245vh;
+    
+
+}
+
+/* تأثير الثلج المتساقط (CSS Animation) */
+.snow-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.snow {
+    position: absolute;
+    top: -10px;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: fall 10s linear infinite;
+}
+
+/* حركة الثلج */
+@keyframes fall {
+    0% { transform: translateY(-10vh) translateX(0); opacity: 1; }
+    100% { transform: translateY(100vh) translateX(50px); opacity: 0.3; }
+}
+
+/* توزيع الثلج بأوقات مختلفة */
+.snow:nth-child(1) { left: 10%; animation-duration: 7s; }
+.snow:nth-child(2) { left: 50%; animation-duration: 12s; animation-delay: 1s; }
+.snow:nth-child(3) { left: 80%; animation-duration: 9s; animation-delay: 5s; }
+
+
+
+
+
+
+/* تنسيق محتوى الهيدر عشان اللوجو والكلمة فوق بعض */
+.header-content {
+    display: flex;
+    flex-direction: column; /* يخليهم فوق بعض */
+    align-items: center;
+    justify-content: center;
+    padding: 5px 0;
+}
+
+/* تنسيق الجملة (Slogan) */
+.app-slogan {
+    margin: 0;
+    margin-top: -5px; /* يقرب الكلمة من اللوجو عشان يبقوا حتة واحدة */
+    font-family: 'Tajawal', sans-serif;
+    font-size: 25px; /* حجم ناعم وبناتي */
+    font-weight: 800; /* عشان تبان واضحة */
+    color: #D2617C; /* لون الروز الغامق الفخم */
+    letter-spacing: 0.5px;
+    
+    /* تأثير ظل أبيض خفيف عشان تنطق فوق الخلفية الروز */
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6);
+    
+    /* أنيميشن ناعم تظهر بيه أول ما تفتح التطبيق */
+    animation: slideUp 1.2s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* تعديل حجم اللوجو عشان المساحة */
+.main-logo {
+    height: 150px; 
+    width: auto;
+    filter: drop-shadow(0 0 10px rgba(210, 97, 124, 0.3));
+}
+
+
+/* حاوية الهيرو الأساسية */
+.hero-slider {
+    width: 100%;
+    height: 250px; /* ارتفاع مناسب جداً للموبايل */
+    position: relative;
+    overflow: hidden;
+    /* زاوية دائرية خفيفة من تحت عشان يندمج مع الأقسام */
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    box-shadow: 0 15px 30px rgba(210, 97, 124, 0.2);
+    margin-bottom: 30px;
+}
+
+/* تغليف الصور لعمل السكرول */
+.slider-wrapper {
+    display: flex;
+    width: 300%; /* عشان عندنا 3 صور */
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+
+.slide {
+    width: 33.333%;
+    height: 100%;
+    position: relative;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* يخلي الصورة تفرش من غير ما تتمط */
+}
+
+/* طبقة ظل خفيفة فوق الصور عشان الكلام واللوجو يبانوا */
+.slide-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 40%, rgba(210, 97, 124, 0.1) 100%);
+}
+
+/* نقاط التنقل (Dots) بشكل مودرن */
+.slider-dots {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.dot.active {
+    background: white;
+    width: 25px; /* النقطة النشطة بتبقى أطول (ستايل احترافي) */
+    border-radius: 10px;
+}
+
+
+.categories-section {
+    padding: 20px;
+    background: transparent;
+}
+
+.section-title h2 {
+    font-size: 18px;
+    color: #D2617C;
+    margin-bottom: 20px;
+    border-right: 4px solid #D2617C;
+    padding-right: 10px;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 أعمدة للموبايل */
+    gap: 15px;
+    row-gap: 20px;
+}
+
+.category-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.3s ease;
+}
+
+.icon-box {
+    width: 65px;
+    height: 65px;
+    background: white;
+    border-radius: 20px; /* زوايا ناعمة */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 15px rgba(210, 97, 124, 0.1);
+    border: 1px solid rgba(210, 97, 124, 0.1);
+}
+
+.icon-box img {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.category-item span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #555;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* تمييز قسم SHEIN */
+.shein-special .icon-box {
+    background: #000; /* خلفية سوداء لـ شي إن */
+}
+.shein-special span {
+    color: #000;
+    font-weight: 800;
+}
+
+/* تأثير عند الضغط */
+.category-item:active {
+    transform: scale(0.9);
+}
+ 
+ 
+ /* تنسيق الهيدر المخفي */
+#sticky-header {
+    position: fixed;
+    top: -100px; /* مخفي فوق الشاشة في البداية */
+    left: 0;
+    width: 100%;
+    height: 70px;
+    z-index: 99999;
+    
+    /* تأثير البلور والشفافية */
+    background: rgba(255, 255, 255, 0.2); 
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: top 0.4s ease-in-out; /* أنيميشن الظهور */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* الكلاس اللي هيضيفه الـ JS عشان يظهره */
+#sticky-header.show {
+    top: 0; /* ينزل لمكانه الطبيعي */
+}
+
+.mini-logo {
+    height: 45px;
+    width: auto;
+    filter: drop-shadow(0 0 5px rgba(210, 97, 124, 0.3));
+}
+
+
+
+
+.lailati-services {
+    position: relative;
+    padding: 60px 0;
+    background: #fff5f7; /* خلفية وردية هادية جداً للدمج */
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    direction: rtl;
+    overflow: hidden;
+}
+
+/* توهج جمالي في الزوايا */
+.pink-glow {
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 182, 193, 0.4) 0%, transparent 70%);
+    filter: blur(50px);
+}
+
+.lailati-title {
+    text-align: center;
+    color: #ff85a2; /* بينك قوي شوية للعنوان */
+    font-size: 2.2rem;
+    margin-bottom: 45px;
+    font-weight: bold;
+}
+
+.services-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 0 5%;
+}
+
+.lailati-card {
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #fff;
+    border-radius: 25px; /* حواف دائرية ناعمة جداً */
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 25px rgba(255, 133, 162, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}
+
+.lailati-card:hover {
+    transform: translateY(-5px);
+    background: #fff;
+    border-color: #ffb6c1;
+    box-shadow: 0 15px 35px rgba(255, 133, 162, 0.2);
+}
+
+.icon-outer {
+    background: #ffeff2;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.icon-box {
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, #ff85a2, #ffb6c1);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+}
+
+.card-info h3 {
+    font-size: 1.1rem;
+    color: #444;
+    margin-bottom: 5px;
+}
+
+.card-info p {
+    font-size: 0.85rem;
+    color: #888;
+    line-height: 1.4;
+}
+
+/* الموبايل */
+@media (max-width: 768px) {
+    .services-wrapper {
+        grid-template-columns: 1fr;
+    }
+    .lailati-title { font-size: 1.7rem; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
+    border-top: 1px solid #eee;
+    z-index: 1000;
+}
+
+.nav-item {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #a0a0a0; /* لون الرموز العادي */
+    font-family: 'Cairo', sans-serif;
+    font-size: 11px;
+    transition: all 0.3s ease;
+}
+
+/* حجم الـ SVG */
+.nav-item svg {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 4px;
+}
+
+/* اللون عند التفعيل (اللون البينك الخاص ببرنامج ليلتي) */
+.nav-item.active {
+    color: #e91e63;
+}
+
+.nav-item.active svg {
+    stroke: #e91e63; /* يغير لون حدود الـ SVG */
+}
+
+/* حركة بسيطة عند الضغط */
+.nav-item:active {
+    transform: scale(0.9);
+}
+
+
+.services-grid {
+    display: grid;
+    /* التعديل هنا: حذف كلمة round */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 20px; 
+    padding: 20px;
+    height: auto; 
+    /* إضافة عشان نضمن إن مفيش حاجة تخرج بره */
+    align-items: start; 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(#eee);
+            height: 75px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.11);
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            z-index: 1000;
+        }
+
+
+
+
+
+
+
+
+
+        /* أساسيات العناوين */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.section-label {
+    color: #D2617C;
+    font-size: 19px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.view-all {
+    color: #a0a0a0;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* الأقسام الرائجة - ستايل Apple/Airbnb */
+.trending-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 15px 20px;
+    scroll-snap-type: x mandatory; /* يخلي السكرول يقف عند الكارت بالظبط */
+}
+
+.trending-scroll::-webkit-scrollbar { display: none; }
+
+.t-card {
+    min-width: 100px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 22px;
+    padding: 18px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 20px rgba(210, 97, 124, 0.08);
+    scroll-snap-align: start;
+    transition: 0.3s;
+}
+
+.t-icon {
+    width: 45px;
+    height: 45px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 4px 8px rgba(210, 97, 124, 0.2));
+}
+
+.t-icon img { width: 100%; height: 100%; object-fit: contain; }
+
+.t-card span {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #D2617C;
+}
+
+/* شبكة الخدمات - ستايل احترافي (2 في الصف) */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 10px 20px 50px;
+}
+
+.cat-card {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 22px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cat-card:active {
+    transform: scale(0.92);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+}
+
+.cat-icon-bg {
+    width: 65px;
+    height: 65px;
+    background: linear-gradient(135deg, #fff5f7 0%, #ffeef2 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.cat-icon-bg img {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.cat-card span {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #4a4a4a;
+    letter-spacing: -0.2px;
+}
+
+/* تمييز خاص لقسم SHEIN */
+.shein-style {
+    background: #000 !important;
+}
+.shein-style span { color: #fff !important; }
+.shein-style .cat-icon-bg { background: rgba(255,255,255,0.1); }

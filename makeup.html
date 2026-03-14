@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ليلتي - خبيرات التجميل</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        :root { --pink: #D2617C; --bg: #F9FAFB; }
+        body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 20px; }
+        .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
+        
+        .grid { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; }
+        .card:active { transform: scale(0.95); }
+        .img-wrapper { width: 100%; height: 140px; background: #eee; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .info { padding: 8px; text-align: center; }
+        .name { font-size: 13px; font-weight: 800; color: #333; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
+        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
+        .btn-confirm { background: var(--pink); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .btn-confirm:disabled { background: #ccc; }
+        
+        .pay-box { background: #fff3f5; border: 1px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 13px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <div class="header"><h1>أفضل خبيرات التجميل ✨</h1></div>
+    <div class="grid" id="makeup-list"></div>
+
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <h2 id="m-title" style="color:var(--pink); margin:0;"></h2>
+            <p id="m-address" style="font-size:12px; color:#777;"></p>
+            
+            <div id="step-1">
+                <p id="m-desc" style="font-size:14px; color:#444; line-height:1.5;"></p>
+                <button class="btn-confirm" onclick="showStep2()">حجز موعد (عربون)</button>
+            </div>
+
+            <div id="step-2" style="display:none;">
+                <div class="pay-box">
+                    يرجى تحويل مبلغ <b>250 ج.م</b> عربون حجز موعد.<br>
+                    فودافون كاش: <b>010XXXXXXXX</b><br>
+                    إينستا باي: <b>laylati@instapay</b>
+                </div>
+                <label style="font-size:13px; font-weight:bold;">ارفقي صورة إيصال التحويل (سكرين شوت):</label>
+                <input type="file" id="receiptFile" accept="image/*" style="width:100%; margin:10px 0;">
+                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">إرسال الإيصال للمراجعة ✅</button>
+            </div>
+            
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#999; margin-top:10px; font-family:'Tajawal'">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { projectId: "gggg-4cab7" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const makeupArtists = [
+            { id: "m01", n: "Dina Ragheb", a: "سموحة", d: "خبيرة تجميل متخصصة في مكياج العرايس وإطلالات السهرة." },
+            { id: "m02", n: "Mai Ayman", a: "كفر عبده", d: "لمسات رقيقة تبرز جمالك الطبيعي في ليلة العمر." },
+            { id: "m03", n: "Aya Abdelhamid", a: "لوران", d: "مكياج سينمائي وثبات عالي يدوم طوال اليوم." },
+            { id: "m04", n: "Mirna Magdy", a: "زيزينيا", d: "خبيرة تجميل وبلوجر متخصصة في أحدث صيحات الموضة." },
+            { id: "m05", n: "Sarah El Kady", a: "ستانلي", d: "إطلالة ملكية بلمسات عصرية متميزة." },
+            { id: "m06", n: "Nouran Makeup", a: "جليم", d: "باقات متكاملة للعروسة ومرافقيها بأسعار متميزة." },
+            { id: "m07", n: "Salma Badreddin", a: "سموحة", d: "خبيرة تجميل معتمدة بخبرة واسعة في حفلات الزفاف." },
+            { id: "m08", n: "Fatma Bahgat", a: "كفر عبده", d: "إبداع في نحت الوجه وإبراز الملامح بأفضل الخامات." },
+            { id: "m09", n: "Yasmin Eissa", a: "محرم بك", d: "دقة في المواعيد وإطلالة تخطف الأنظار." },
+            { id: "m10", n: "Rania Elshamy", a: "الإبراهيمية", d: "متخصصة في لوكات السواريه ومكياج الزفاف الراقي." }
+        ];
+
+        let selectedArtist = null;
+
+        const list = document.getElementById('makeup-list');
+        makeupArtists.forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => {
+                selectedArtist = m;
+                document.getElementById('m-title').innerText = m.n;
+                document.getElementById('m-address').innerText = "📍 " + m.a;
+                document.getElementById('m-desc').innerText = m.d;
+                document.getElementById('step-1').style.display = 'block';
+                document.getElementById('step-2').style.display = 'none';
+                document.getElementById('bookingModal').style.display = 'flex';
+            };
+            card.innerHTML = `
+                <div class="img-wrapper"><img src="https://via.placeholder.com/300x350?text=${m.n}"></div>
+                <div class="info"><span class="name">${m.n}</span></div>
+            `;
+            list.appendChild(card);
+        });
+
+        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
+        function showStep2() { document.getElementById('step-1').style.display = 'none'; document.getElementById('step-2').style.display = 'block'; }
+
+        async function processBooking() {
+            const file = document.getElementById('receiptFile').files[0];
+            const phone = localStorage.getItem('loggedPhone');
+            const btn = document.getElementById('finalBtn');
+
+            if (!phone) { alert("من فضلك سجلي دخول أولاً"); return; }
+            if (!file) { alert("يجب رفع صورة الإيصال"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "جاري التحميل...";
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                try {
+                    await db.collection("pending_payments").add({
+                        partnerId: selectedArtist.id,
+                        partnerName: selectedArtist.n,
+                        customerPhone: phone,
+                        receiptBase64: reader.result,
+                        status: "انتظار مراجعة الموظف",
+                        type: "ميك أب ارتست",
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    alert("تم إرسال طلبك! الموظف هيراجع الإيصال ويأكد حجز الموعد.");
+                    closeModal();
+                } catch (e) { alert("خطأ: " + e.message); }
+                finally { btn.disabled = false; btn.innerText = "إرسال الإيصال للمراجعة ✅"; }
+            };
+        }
+    </script>
+</body>
+</html>

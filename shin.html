@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ليلتي - طلبات Shein ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <style>
+        :root { --shein-black: #000000; --pink: #D2617C; --bg: #F9FAFB; }
+        body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 50px; }
+        
+        .header { padding: 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header h1 { color: var(--shein-black); margin: 0; font-size: 22px; letter-spacing: 2px; }
+        .header p { color: #888; font-size: 12px; margin-top: 5px; }
+
+        .order-container { padding: 20px; max-width: 500px; margin: 0 auto; }
+        .info-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 14px; font-weight: bold; color: #444; margin-bottom: 8px; }
+        .input-group input, .input-group textarea { 
+            width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 12px; 
+            font-family: 'Tajawal'; font-size: 14px; outline: none; box-sizing: border-box; background: #fafafa;
+        }
+        .input-group input:focus { border-color: var(--pink); background: #fff; }
+
+        .btn-order { 
+            background: var(--shein-black); color: white; border: none; padding: 18px; 
+            border-radius: 15px; width: 100%; font-weight: bold; font-size: 16px; 
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn-order:active { transform: scale(0.98); }
+
+        .how-to { font-size: 12px; color: #666; line-height: 1.6; background: #fff4f6; padding: 15px; border-radius: 15px; border: 1px dashed var(--pink); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>SHEIN 🖤 ليلتي</h1>
+        <p>اطلبي كل اللي محتاجاه من شي إن وهيوصلك لحد البيت</p>
+    </div>
+
+    <div class="order-container">
+        <div class="how-to">
+            <strong>طريقة الطلب:</strong><br>
+            انسخي رابط المنتج من تطبيق Shein وضعيه في المربع بالأسفل، مع تحديد المقاس واللون المكتوب في التطبيق.
+        </div>
+
+        <div class="info-card" style="margin-top: 20px;">
+            <div class="input-group">
+                <label>رابط المنتج (Link)</label>
+                <input type="text" id="itemLink" placeholder="https://ar.shein.com/...">
+            </div>
+
+            <div class="input-group">
+                <label>المقاس واللون</label>
+                <input type="text" id="itemDetails" placeholder="مثال: أسود - مقاس L">
+            </div>
+
+            <div class="input-group">
+                <label>ملاحظات إضافية (اختياري)</label>
+                <textarea id="itemNote" rows="3" placeholder="أي تفاصيل تانية محتاجة تبلغينا بيها..."></textarea>
+            </div>
+
+            <button id="submitBtn" class="btn-order" onclick="sendSheinOrder()">إرسال طلب الشراء</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { projectId: "gggg-4cab7" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function sendSheinOrder() {
+            const link = document.getElementById('itemLink').value.trim();
+            const details = document.getElementById('itemDetails').value.trim();
+            const note = document.getElementById('itemNote').value.trim();
+            const phone = localStorage.getItem('loggedPhone');
+            const btn = document.getElementById('submitBtn');
+
+            if (!phone) { alert("يرجى تسجيل الدخول أولاً."); return; }
+            if (!link || !details) { alert("من فضلك حطي الرابط والتفاصيل."); return; }
+
+            btn.disabled = true;
+            btn.innerText = "جاري الحفظ...";
+
+            try {
+                // جلب اسم العروسة
+                const userSnap = await db.collection("users").where("phoneNumber", "==", phone).get();
+                let userName = "عروسة ليلتي";
+                if (!userSnap.empty) userName = userSnap.docs[0].data().fullName;
+
+                await db.collection("shein_orders").add({
+                    customerName: userName,
+                    customerPhone: phone,
+                    productLink: link,
+                    productDetails: details,
+                    userNote: note,
+                    orderDate: new Date().toLocaleString('ar-EG'),
+                    status: "في انتظار التسعير"
+                });
+
+                alert("تم استلام طلبك يا " + userName + "! فريق ليلتي هيراجع الطلب ويكلمك بخصوص السعر وموعد الوصول.");
+                
+                // مسح البيانات بعد الإرسال
+                document.getElementById('itemLink').value = "";
+                document.getElementById('itemDetails').value = "";
+                document.getElementById('itemNote').value = "";
+
+            } catch (err) {
+                alert("حدث خطأ: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "إرسال طلب الشراء";
+            }
+        }
+    </script>
+</body>
+</html>

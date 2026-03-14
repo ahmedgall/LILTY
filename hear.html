@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ليلتي - مصففي الشعر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        :root { --pink: #D2617C; --bg: #F9FAFB; }
+        body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 20px; }
+        .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
+        
+        .grid { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.05); cursor: pointer; }
+        .img-wrapper { width: 100%; height: 140px; background: #eee; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .info { padding: 10px; text-align: center; }
+        .name { font-size: 13px; font-weight: 800; color: #333; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
+        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
+        .btn-confirm { background: var(--pink); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .pay-box { background: #fff3f5; border: 1px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="header"><h1>أشهر مصففي الشعر (Hair Stylists) ✨</h1></div>
+    
+    <div class="grid" id="stylist-list"></div>
+
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <h2 id="m-title" style="color:var(--pink); margin:0;"></h2>
+            <p id="m-desc" style="font-size:14px; color:#444; margin: 10px 0;"></p>
+            
+            <div id="step-1">
+                <p style="font-size:13px; color:#777;">* يشمل الحجز تسريحة ليلة العمر وتنسيق الطرحة أو التاج.</p>
+                <button class="btn-confirm" onclick="showStep2()">حجز موعد (عربون 150 ج.م)</button>
+            </div>
+
+            <div id="step-2" style="display:none;">
+                <div class="pay-box">
+                    يرجى تحويل مبلغ <b>150 ج.م</b> عربون تأكيد حجز الموعد.<br>
+                    فودافون كاش: <b>010XXXXXXXX</b><br>
+                    إينستا باي: <b>laylati@instapay</b>
+                </div>
+                <label style="font-size:13px; font-weight:bold;">ارفعي صورة إيصال التحويل:</label>
+                <input type="file" id="receiptFile" accept="image/*" style="width:100%; margin:10px 0;">
+                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">إرسال للمراجعة ✅</button>
+            </div>
+            
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#999; margin-top:10px;">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { projectId: "gggg-4cab7" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // قائمة الـ 10 مصففين
+        const stylists = [
+            { id: "S01", n: "Haitham Dahab", d: "مصفف شعر المشاهير، متخصص في أحدث صيحات تسريحات العرايس." },
+            { id: "S02", n: "Richard El Boustany", d: "إطلالة ملكية ولمسات فريدة تناسب شكل الوجه وفستان الزفاف." },
+            { id: "S03", n: "Mina Khamis", d: "خبير في صبغات الشعر وتسريحات الرفعة الكلاسيكية للعرايس." },
+            { id: "S04", n: "Ramy El Kholy", d: "تميزي بتسريحة عصرية تدوم طوال الحفلة مع أفضل مثبتات الشعر." },
+            { id: "S05", n: "Ahmed Mounir", d: "متخصص في تركيبات الشعر (Extensions) وتسريحات الويفي الجذابة." },
+            { id: "S06", n: "Saeed Ramzi", d: "فن وإبداع في تنفيذ تسريحات شعر مبتكرة لكل عروسة تبحث عن التميز." },
+            { id: "S07", n: "Hassan Bourji", d: "إطلالة بسيطة وراقية تعكس جمالك الطبيعي في ليلة العمر." },
+            { id: "S08", n: "Walid Ghadban", d: "خبرة واسعة في التعامل مع جميع أنواع الشعر وتنسيق الاكسسوارات." },
+            { id: "S09", n: "Karem Style", d: "باقات خاصة للعرايس تشمل العناية بالشعر والتصفيف النهائي." },
+            { id: "S10", n: "Sherif Stylist", d: "دقة في المواعيد ونتائج مذهلة تليق بملكة في ليلتها." }
+        ];
+
+        let selectedStylist = null;
+        const list = document.getElementById('stylist-list');
+
+        stylists.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => {
+                selectedStylist = s;
+                document.getElementById('m-title').innerText = s.n;
+                document.getElementById('m-desc').innerText = s.d;
+                document.getElementById('step-1').style.display = 'block';
+                document.getElementById('step-2').style.display = 'none';
+                document.getElementById('bookingModal').style.display = 'flex';
+            };
+            card.innerHTML = `
+                <div class="img-wrapper"><img src="https://via.placeholder.com/300x350?text=${s.n}"></div>
+                <div class="info"><span class="name">${s.n}</span></div>
+            `;
+            list.appendChild(card);
+        });
+
+        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
+        function showStep2() { document.getElementById('step-1').style.display = 'none'; document.getElementById('step-2').style.display = 'block'; }
+
+        async function processBooking() {
+            const file = document.getElementById('receiptFile').files[0];
+            const phone = localStorage.getItem('loggedPhone');
+            const btn = document.getElementById('finalBtn');
+
+            if (!phone) { alert("من فضلك سجلي دخول أولاً"); return; }
+            if (!file) { alert("ارفعي صورة الإيصال"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "جاري الإرسال...";
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                try {
+                    await db.collection("pending_payments").add({
+                        partnerId: selectedStylist.id,
+                        partnerName: selectedStylist.n,
+                        customerPhone: phone,
+                        receiptBase64: reader.result,
+                        type: "مصفف شعر",
+                        status: "انتظار مراجعة الموظف",
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    alert("تم إرسال طلبك! الموظف هيراجع الإيصال ويأكد حجز المصفف.");
+                    closeModal();
+                } catch (e) { alert("خطأ: " + e.message); }
+                finally { btn.disabled = false; btn.innerText = "إرسال للمراجعة ✅"; }
+            };
+        }
+    </script>
+</body>
+</html>
