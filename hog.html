@@ -9,70 +9,77 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <style>
-       
-       .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; border-radius: 20px 20px 0 0; }
-.nav-link { text-decoration: none; color: #D2617C; display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: bold; flex: 1; }
-.nav-link svg { width: 24px; height: 24px; fill: currentColor; margin-bottom: 4px; }
-.nav-link.active { color: #bbb; } /* اللون الوردي المعتمد */
-       :root { --pink: #D2617C; --bg: #F9FAFB; }
+        :root { --pink: #D2617C; --bg: #F9FAFB; --green: #27ae60; --yellow: #f39c12; }
         body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 90px; }
+        
         .header { padding: 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; font-weight: 800; }
+
         .bookings-list { padding: 15px; }
-        .booking-card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border-right: 6px solid var(--pink); position: relative; }
+        .booking-card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); position: relative; border: 1px solid #eee; }
+        
         .booking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .service-type { background: #fff0f3; color: var(--pink); padding: 5px 12px; border-radius: 10px; font-size: 11px; font-weight: bold; }
-        .item-name { font-size: 17px; font-weight: 800; color: #222; display: block; margin-bottom: 8px; }
-        .status-badge { display: inline-block; margin-top: 10px; padding: 6px 15px; border-radius: 25px; font-size: 12px; font-weight: bold; }
         
-        /* ألوان الحالات */
-        .status-waiting { background: #fff8e1; color: #fbc02d; } /* انتظار المراجعة */
-        .status-confirmed { background: #e8f5e9; color: #4caf50; } /* تم التأكيد */
+        .item-name { font-size: 17px; font-weight: 800; color: #222; display: block; margin-bottom: 5px; }
+        .transfer-ref { font-size: 12px; color: #777; margin-bottom: 10px; display: block; }
         
+        .status-badge { display: inline-block; padding: 7px 15px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        
+        /* حالات الحجز */
+        .status-waiting { background: #fff9f0; color: var(--yellow); border: 1px solid #fde6bd; }
+        .status-confirmed { background: #ebf9f1; color: var(--green); border: 1px solid #c2edcf; }
+
         .loading-msg { text-align: center; padding: 60px; color: var(--pink); font-weight: bold; }
         .empty-state { text-align: center; padding: 100px 20px; color: #bbb; }
-        
-       
+        .empty-state img { width: 80px; opacity: 0.3; margin-bottom: 15px; }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; border-radius: 20px 20px 0 0; }
+        .nav-link { text-decoration: none; color: #bbb; display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: bold; flex: 1; transition: 0.3s; }
+        .nav-link svg { width: 24px; height: 24px; fill: currentColor; margin-bottom: 4px; }
+        .nav-link.active { color: var(--pink); }
     </style>
 </head>
 <body>
 
-    <div class="header"><h1>جدول حجزاتي 📅</h1></div>
+    <div class="header"><h1>حجزاتي 📅</h1></div>
 
     <div id="loading" class="loading-msg">جاري تحميل حجوزاتك...</div>
+    
     <div id="bookings-container" class="bookings-list"></div>
-    <div id="empty-msg" class="empty-state" style="display: none;">🚨 لم نجد أي حجوزات مسجلة برقمك.</div>
+    
+    <div id="empty-msg" class="empty-state" style="display: none;">
+        <img src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png" alt="empty">
+        <p>🚨 لم نجد أي حجوزات مسجلة برقمك حالياً.</p>
+    </div>
 
-
-
-<nav class="bottom-nav">
-    <a href="inde.html" class="nav-link active ">
-        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-        <span>الرئيسية</span>
-    </a>
-    <a href="hog.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-        <span>الحجوزات</span>
-    </a>
-    <a href="ac.html" class="nav-link active">
-        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        <span>حسابي</span>
-    </a>
-</nav>
-
-
+    <nav class="bottom-nav">
+        <a href="inde.html" class="nav-link">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>الرئيسية</span>
+        </a>
+        <a href="my-bookings.html" class="nav-link active">
+            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+            <span>الحجوزات</span>
+        </a>
+        <a href="profile.html" class="nav-link">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span>حسابي</span>
+        </a>
+    </nav>
 
     <script>
         const firebaseConfig = { projectId: "gggg-4cab7" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // سحب رقم التليفون من اللوكال ستورج
+        // سحب رقم التليفون المسجل
         const userPhone = localStorage.getItem('loggedPhone') ? localStorage.getItem('loggedPhone').trim() : null;
 
         async function loadMyBookings() {
             if (!userPhone) {
-                document.getElementById('loading').innerHTML = "⚠️ يرجى تسجيل الدخول أولاً";
+                document.getElementById('loading').innerHTML = "⚠️ يرجى تسجيل الدخول لمشاهدة حجوزاتك";
                 return;
             }
 
@@ -81,7 +88,7 @@
             const emptyMsg = document.getElementById('empty-msg');
 
             try {
-                // هنسحب من جدولين بس (المعلق والمؤكد) وده أسرع بكتير
+                // البحث في الكولكشن المعلق والمؤكد برقم العروسة
                 const [pendingSnap, confirmedSnap] = await Promise.all([
                     db.collection("pending_payments").where("customerPhone", "==", userPhone).get(),
                     db.collection("confirmed_bookings").where("customerPhone", "==", userPhone).get()
@@ -89,14 +96,12 @@
 
                 let allMyBookings = [];
 
-                // معالجة الحجوزات المعلقة
                 pendingSnap.forEach(doc => {
-                    allMyBookings.push({ id: doc.id, ...doc.data(), isConfirmed: false });
+                    allMyBookings.push({ id: doc.id, ...doc.data(), statusKey: 'waiting' });
                 });
 
-                // معالجة الحجوزات المؤكدة
                 confirmedSnap.forEach(doc => {
-                    allMyBookings.push({ id: doc.id, ...doc.data(), isConfirmed: true });
+                    allMyBookings.push({ id: doc.id, ...doc.data(), statusKey: 'confirmed' });
                 });
 
                 loading.style.display = 'none';
@@ -106,22 +111,28 @@
                     return;
                 }
 
-                // عرض الداتا
+                // ترتيب من الأحدث للأقدم
+                allMyBookings.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
                 container.innerHTML = '';
                 allMyBookings.forEach(item => {
-                    const statusText = item.isConfirmed ? "تم التأكيد ✅" : "انتظار مراجعة الإيصال ⏳";
-                    const statusClass = item.isConfirmed ? "status-confirmed" : "status-waiting";
+                    const isConfirmed = item.statusKey === 'confirmed';
+                    const statusText = isConfirmed ? "تم التأكيد بنجاح ✅" : "انتظار مراجعة الإيصال ⏳";
+                    const statusClass = isConfirmed ? "status-confirmed" : "status-waiting";
                     
+                    // تحديد الاسم المعروض (سواء قاعة أو فستان أو غيره)
+                    const displayName = item.hallName || item.partnerName || "خدمة ليلتي";
+
                     container.innerHTML += `
-                        <div class="booking-card">
+                        <div class="booking-card" style="border-right: 6px solid ${isConfirmed ? 'var(--green)' : 'var(--yellow)'}">
                             <div class="booking-header">
-                                <span class="service-type">${item.type || 'خدمة'}</span>
+                                <span class="service-type">${item.type || 'حجز'}</span>
                                 <span style="font-size:11px; color:#999;">
                                     ${item.createdAt ? new Date(item.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'اليوم'}
                                 </span>
                             </div>
-                            <span class="item-name">${item.partnerName}</span>
-                            <div style="font-size:13px; color:#666;">كود الحجز: ${item.partnerId}</div>
+                            <span class="item-name">${displayName}</span>
+                            <span class="transfer-ref">رقم التحويل: ${item.transferFrom || 'غير مسجل'}</span>
                             <div class="status-badge ${statusClass}">${statusText}</div>
                         </div>
                     `;
@@ -129,7 +140,7 @@
 
             } catch (err) {
                 console.error(err);
-                loading.innerText = "❌ فشل تحميل البيانات";
+                loading.innerText = "❌ فشل تحميل البيانات، تأكد من اتصال الإنترنت";
             }
         }
 
