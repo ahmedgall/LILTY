@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ليلتي - أتيليهات الفساتين</title>
+    <title>ليلتي - أتيليهات الفساتين ✨</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -12,74 +12,91 @@
     <style>
         :root { --pink: #D2617C; --bg: #F9FAFB; }
         body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 20px; }
-        .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
         
+        .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; font-weight: 800; }
+        
+        /* Grid لظهور الاتيليهات */
         .grid { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.05); cursor: pointer; }
-        .img-wrapper { width: 100%; height: 130px; background: #eee; }
+        .card { background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.06); cursor: pointer; transition: 0.3s; border: 1px solid #eee; }
+        .card:active { transform: scale(0.96); }
+        
+        .img-wrapper { width: 100%; height: 160px; background: #fdf2f4; position: relative; }
         .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .info { padding: 8px; text-align: center; }
-        .name { font-size: 12px; font-weight: 800; color: #333; }
+        .img-wrapper::after { content: '👗'; position: absolute; bottom: 10px; left: 10px; font-size: 20px; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 5px; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
-        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
-        .btn-confirm { background: var(--pink); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .info { padding: 10px; text-align: center; }
+        .name { font-size: 13px; font-weight: 800; color: #333; display: block; margin-bottom: 4px; }
+        .loc { font-size: 11px; color: #888; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: flex-end; backdrop-filter: blur(4px); }
+        .modal-content { background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
+        
+        .btn-confirm { background: var(--pink); color: white; border: none; padding: 16px; border-radius: 15px; width: 100%; font-weight: 800; font-size: 16px; margin-top: 15px; cursor: pointer; }
         .btn-confirm:disabled { background: #ccc; }
         
-        .pay-box { background: #fff3f5; border: 1px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 13px; }
+        .pay-box { background: #fff8f9; border: 1px dashed var(--pink); padding: 18px; border-radius: 15px; margin: 15px 0; font-size: 14px; line-height: 1.6; }
+        .pay-box b { color: var(--pink); font-size: 16px; }
+
+        input[type="tel"] { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1.5px solid #eee; font-family: 'Tajawal'; font-size: 16px; text-align: center; outline: none; box-sizing: border-box; }
+        input[type="tel"]:focus { border-color: var(--pink); background: #fffcfd; }
     </style>
 </head>
 <body>
 
-    <div class="header"><h1>أرقى أتيليهات الإسكندرية ✨</h1></div>
+    <div class="header"><h1>أرقى 10 أتيليهات في الإسكندرية ✨</h1></div>
     <div class="grid" id="list"></div>
 
     <div id="bookingModal" class="modal">
         <div class="modal-content">
-            <h2 id="m-title" style="color:var(--pink); margin:0;"></h2>
-            <p id="m-address" style="font-size:12px; color:#777;"></p>
+            <h2 id="m-title" style="color:var(--pink); margin:0; font-size: 22px;"></h2>
+            <p id="m-address" style="font-size:13px; color:#777; margin: 5px 0 15px 0;"></p>
             
             <div id="step-1">
-                <p id="m-desc" style="font-size:14px; color:#444; line-height:1.5;"></p>
+                <p id="m-desc" style="font-size:15px; color:#444; line-height:1.6; background: #f9f9f9; padding: 15px; border-radius: 12px;"></p>
                 <button class="btn-confirm" onclick="showStep2()">حجز موعد قياس (عربون)</button>
             </div>
 
             <div id="step-2" style="display:none;">
                 <div class="pay-box">
-                    عربون حجز الموعد: <b>200 ج.م</b> (يخصم من السعر النهائى).<br>
+                    عربون حجز الموعد: <b>200 ج.م</b> (يخصم من السعر النهائي).<br>
                     فودافون كاش: <b>010XXXXXXXX</b><br>
                     إينستا باي: <b>laylati@instapay</b>
                 </div>
-                <label style="font-size:13px; font-weight:bold;">ارفعي صورة إيصال التحويل:</label>
-                <input type="file" id="receiptFile" accept="image/*" style="width:100%; margin:10px 0;">
-                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">تأكيد وإرسال الإيصال ✅</button>
+                
+                <label style="font-size:14px; font-weight:700;">اكتبي رقم المحفظة المحول منه:</label>
+                <input type="tel" id="senderPhone" placeholder="01xxxxxxxxx" maxlength="11">
+                
+                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">تأكيد وإرسال البيانات ✅</button>
             </div>
             
-            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#999; margin-top:10px;">إغلاق</button>
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#bbb; margin-top:15px; font-family: 'Tajawal'; font-weight: bold;">إلغاء</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = { projectId: "gggg-4cab7" };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // قائمة الـ 10 أتيليهات
         const items = [
-            { id: "d01", n: "Atelier La Sposa", a: "لوران", d: "أحدث صيحات فساتين الزفاف العالمية." },
-            { id: "d02", n: "Pronovias Alex", a: "كفر عبده", d: "فخامة وأناقة لا مثيل لها." },
-            { id: "d03", n: "أتيليه سندريلا", a: "سموحة", d: "تشكيلة واسعة تناسب كل الأذواق." },
-            { id: "d04", n: "Queen Dresses", a: "فليمنج", d: "تصميمات خاصة متميزة جداً." },
-            { id: "d05", n: "أتيليه رويال", a: "زيزينيا", d: "رقي في التعامل وجودة في الخامات." },
-            { id: "d06", n: "White Rose", a: "بوكلي", d: "فساتين زفاف وخطوبة بأحدث الموديلات." },
-            { id: "d07", n: "أتيليه ليلة العمر", a: "جليم", d: "نساعدك لتكوني ملكة في ليلتك." },
-            { id: "d08", n: "Elegance Atelier", a: "ستانلي", d: "بساطة وشياكة في كل تفصيلة." },
-            { id: "d09", n: "أتيليه برنسيس", a: "السرايا", d: "أسعار تنافسية وموديلات رائعة." },
-            { id: "d10", n: "Dream Dress", a: "السيوف", d: "فستان أحلامك بين يديك." }
+            { id: "d01", n: "Atelier La Sposa", a: "لوران", d: "أحدث صيحات فساتين الزفاف العالمية بتصاميم تناسب الملكات." },
+            { id: "d02", n: "Pronovias Alex", a: "كفر عبده", d: "فخامة وأناقة إسبانية لا مثيل لها في قلب الإسكندرية." },
+            { id: "d03", n: "أتيليه سندريلا", a: "سموحة", d: "تشكيلة واسعة من فساتين الخطوبة والزفاف بلمسات عصرية." },
+            { id: "d04", n: "Queen Dresses", a: "فليمنج", d: "تصميمات خاصة متميزة جداً تجعلكِ ملكة متوجة في ليلتك." },
+            { id: "d05", n: "أتيليه رويال", a: "زيزينيا", d: "رقي في التعامل وجودة في الخامات مع أسعار تنافسية جداً." },
+            { id: "d06", n: "White Rose", a: "بوكلي", d: "فساتين زفاف وخطوبة بأحدث الموديلات التركية والأوروبية." },
+            { id: "d07", n: "أتيليه ليلة العمر", a: "جليم", d: "نساعدكِ لتكوني الأجمل بمجموعة مختارة من أرقى الأقمشة." },
+            { id: "d08", n: "Elegance Atelier", a: "ستانلي", d: "بساطة وشياكة في كل تفصيلة، عنوان الأناقة في الإسكندرية." },
+            { id: "d09", n: "أتيليه برنسيس", a: "السرايا", d: "أقوى عروض فساتين الزفاف مع خدمة تفصيل وتعديل احترافية." },
+            { id: "d10", n: "Dream Dress", a: "السيوف", d: "فستان أحلامكِ أصبح حقيقة، تشكيلة متنوعة لكل المقاسات." }
         ];
 
         let selectedItem = null;
 
+        // توليد الكروت في الصفحة
         const container = document.getElementById('list');
         items.forEach(h => {
             const card = document.createElement('div');
@@ -93,7 +110,14 @@
                 document.getElementById('step-2').style.display = 'none';
                 document.getElementById('bookingModal').style.display = 'flex';
             };
-            card.innerHTML = `<div class="img-wrapper"><img src="https://via.placeholder.com/300x400?text=${h.n}"></div><div class="info"><span class="name">${h.n}</span></div>`;
+            card.innerHTML = `
+                <div class="img-wrapper">
+                    <img src="https://via.placeholder.com/300x450?text=${encodeURIComponent(h.n)}">
+                </div>
+                <div class="info">
+                    <span class="name">${h.n}</span>
+                    <span class="loc">📍 ${h.a}</span>
+                </div>`;
             container.appendChild(card);
         });
 
@@ -101,34 +125,35 @@
         function showStep2() { document.getElementById('step-1').style.display = 'none'; document.getElementById('step-2').style.display = 'block'; }
 
         async function processBooking() {
-            const file = document.getElementById('receiptFile').files[0];
-            const phone = localStorage.getItem('loggedPhone');
+            const senderPhone = document.getElementById('senderPhone').value.trim();
+            const customerPhone = localStorage.getItem('loggedPhone');
             const btn = document.getElementById('finalBtn');
 
-            if (!phone) { alert("سجلي دخول أولاً"); return; }
-            if (!file) { alert("ارفعي صورة الإيصال"); return; }
+            if (!customerPhone) { alert("من فضلكِ سجلي دخولك أولاً"); return; }
+            if (senderPhone.length < 11) { alert("اكتبي رقم محفظة صحيح (11 رقم)"); return; }
 
             btn.disabled = true;
-            btn.innerText = "جاري المعالجة...";
+            btn.innerText = "جاري الحفظ...";
 
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                try {
-                    await db.collection("pending_payments").add({
-                        partnerId: selectedItem.id,
-                        partnerName: selectedItem.n,
-                        customerPhone: phone,
-                        receiptBase64: reader.result,
-                        type: "أتيليه فساتين",
-                        status: "انتظار مراجعة الموظف",
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    alert("تم إرسال طلبك! الموظف هيراجع الإيصال ويأكد حجز موعد القياس.");
-                    closeModal();
-                } catch (e) { alert("خطأ: " + e.message); }
-                finally { btn.disabled = false; btn.innerText = "تأكيد وإرسال الإيصال ✅"; }
-            };
+            try {
+                await db.collection("pending_payments").add({
+                    partnerId: selectedItem.id,
+                    partnerName: selectedItem.n,
+                    customerPhone: customerPhone,
+                    transferFrom: senderPhone,
+                    type: "أتيليه فساتين",
+                    amount: 200,
+                    status: "انتظار مراجعة الموظف",
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("تم إرسال طلبك! الموظف سيراجع التحويل ويأكد موعد القياس معكِ قريباً.");
+                closeModal();
+            } catch (e) { 
+                alert("حدث خطأ في الشبكة: " + e.message); 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerText = "تأكيد وإرسال البيانات ✅"; 
+            }
         }
     </script>
 </body>
