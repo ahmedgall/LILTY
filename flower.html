@@ -3,80 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ليلتي - بوكيهات الورد</title>
+    <title>ليلتي - بوكيهات الورد ✨</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
     <style>
         :root { --pink: #D2617C; --bg: #F9FAFB; }
         body { margin: 0; font-family: 'Tajawal', sans-serif; background: var(--bg); direction: rtl; padding-bottom: 20px; }
-        .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .header h1 { color: var(--pink); margin: 0; font-size: 20px; }
-        .shop-info { text-align: center; padding: 15px; color: #666; font-size: 14px; }
         
-        .grid { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 3px 8px rgba(0,0,0,0.05); cursor: pointer; }
-        .img-wrapper { width: 100%; height: 150px; background: #eee; }
-        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .info { padding: 10px; text-align: center; }
-        .name { font-size: 13px; font-weight: 800; color: #333; display: block; }
-        .price { font-size: 12px; color: var(--pink); font-weight: bold; margin-top: 5px; display: block; }
+        .header { padding: 15px 20px; background: white; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header h1 { color: var(--pink); margin: 0; font-size: 20px; font-weight: 800; }
+        .shop-tag { text-align: center; padding: 10px; font-size: 13px; color: #888; background: #fff; border-bottom: 1px solid #eee; }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
-        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
-        .btn-confirm { background: var(--pink); color: white; border: none; padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
-        .pay-box { background: #fff3f5; border: 1px dashed var(--pink); padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 13px; }
+        .grid { padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card { background: white; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.04); cursor: pointer; border: 1px solid #fff; transition: 0.3s; }
+        .card:active { transform: scale(0.96); border-color: var(--pink); }
+        
+        .img-wrapper { width: 100%; height: 160px; background: #fef1f4; }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .info { padding: 12px; text-align: center; }
+        .name { font-size: 13px; font-weight: 800; color: #333; display: block; margin-bottom: 4px; }
+        .price { font-size: 14px; color: var(--pink); font-weight: 800; display: block; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: flex-end; backdrop-filter: blur(4px); }
+        .modal-content { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
+        
+        .btn-confirm { background: var(--pink); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; font-weight: 800; font-size: 16px; margin-top: 15px; cursor: pointer; }
+        
+        .pay-box { background: #fffcfd; border: 1.5px dashed var(--pink); padding: 18px; border-radius: 15px; margin: 15px 0; font-size: 14px; line-height: 1.6; }
+        .pay-box b { color: var(--pink); font-size: 17px; }
+
+        input[type="tel"] { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1.5px solid #eee; font-family: 'Tajawal'; font-size: 18px; text-align: center; outline: none; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
     <div class="header"><h1>بوكيهات ورد العروسة ✨</h1></div>
-    <div class="shop-info">عرض خاص من محل <b>"روز جاريدن - Rose Garden"</b> بالأسكندرية</div>
-    
+    <div class="shop-tag">عرض خاص: محل <b>Rose Garden</b> - فرع الإسكندرية</div>
+
     <div class="grid" id="flowers-list"></div>
 
     <div id="bookingModal" class="modal">
         <div class="modal-content">
-            <h2 id="m-title" style="color:var(--pink); margin:0;"></h2>
-            <p id="m-price" style="font-size:14px; color:#777; font-weight:bold;"></p>
+            <h2 id="m-title" style="color:var(--pink); margin:0; font-size: 18px;"></h2>
+            <p id="m-price" style="color:#777; font-weight:bold; margin: 8px 0;"></p>
             
             <div id="step-1">
-                <p style="font-size:14px; color:#444;">بوكيه ورد طبيعي منسق خصيصاً ليومك الكبير من أفضل الخامات.</p>
+                <p style="font-size:14px; color:#555; line-height:1.6;">بوكيه ورد طبيعي منسق باحترافية ليوم زفافك. (العربون يخصم من السعر الإجمالي عند الاستلام).</p>
                 <button class="btn-confirm" onclick="showStep2()">حجز البوكيه (عربون 100 ج.م)</button>
             </div>
 
             <div id="step-2" style="display:none;">
                 <div class="pay-box">
-                    يرجى تحويل مبلغ <b>100 ج.م</b> عربون حجز.<br>
+                    يرجى تحويل مبلغ <b>100 ج.م</b> عربون تأكيد حجز.<br>
                     فودافون كاش: <b>010XXXXXXXX</b><br>
                     إينستا باي: <b>laylati@instapay</b>
                 </div>
-                <label style="font-size:13px; font-weight:bold;">ارفعي صورة إيصال التحويل (ScreenShot):</label>
-                <input type="file" id="receiptFile" accept="image/*" style="width:100%; margin:10px 0;">
-                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">إرسال الإيصال للمراجعة ✅</button>
+                
+                <label style="font-size:13px; font-weight:800;">الرقم الذي قمتِ بالتحويل منه:</label>
+                <input type="tel" id="senderPhone" placeholder="01xxxxxxxxx" maxlength="11">
+                
+                <button id="finalBtn" class="btn-confirm" onclick="processBooking()">تأكيد الحجز للمراجعة ✅</button>
             </div>
             
-            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#999; margin-top:10px;">إغلاق</button>
+            <button onclick="closeModal()" style="width:100%; background:none; border:none; color:#bbb; margin-top:15px; font-weight: 800;">إغلاق</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = { projectId: "gggg-4cab7" };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // الـ 10 بوكيهات بتفاصيلهم
         const flowers = [
-            { id: "f01-1", n: "بوكيه كلاسيك أبيض", p: "600 ج.م" },
-            { id: "f01-2", n: "بوكيه روز لافندر", p: "750 ج.م" },
-            { id: "f01-3", n: "بوكيه التوليب الراقي", p: "1200 ج.م" },
-            { id: "f01-4", n: "بوكيه الريد فيلفيت", p: "850 ج.م" },
-            { id: "f01-5", n: "بوكيه الميكس باستيل", p: "700 ج.م" },
-            { id: "f01-6", n: "بوكيه بيبي روز ملكي", p: "950 ج.م" },
-            { id: "f01-7", n: "بوكيه الأوركيد الفخم", p: "1500 ج.م" },
-            { id: "f01-8", n: "بوكيه الشمس المشرقة", p: "550 ج.م" },
-            { id: "f01-9", n: "بوكيه الكازابلانكا", p: "1100 ج.م" },
-            { id: "f01-10", n: "بوكيه الجيبسوفيلا", p: "500 ج.م" }
+            { id: "F01", n: "بوكيه كلاسيك أبيض", p: "600 ج.م" },
+            { id: "F02", n: "بوكيه روز لافندر", p: "750 ج.م" },
+            { id: "F03", n: "بوكيه التوليب الراقي", p: "1200 ج.م" },
+            { id: "F04", n: "بوكيه الريد فيلفيت", p: "850 ج.م" },
+            { id: "F05", n: "بوكيه الميكس باستيل", p: "700 ج.م" },
+            { id: "F06", n: "بوكيه بيبي روز ملكي", p: "950 ج.م" },
+            { id: "F07", n: "بوكيه الأوركيد الفخم", p: "1500 ج.م" },
+            { id: "F08", n: "بوكيه الشمس المشرقة", p: "550 ج.م" },
+            { id: "F09", n: "بوكيه الكازابلانكا", p: "1100 ج.م" },
+            { id: "F10", n: "بوكيه الجيبسوفيلا", p: "500 ج.م" }
         ];
 
         let selectedFlower = null;
@@ -88,12 +101,18 @@
             card.onclick = () => {
                 selectedFlower = f;
                 document.getElementById('m-title').innerText = f.n;
-                document.getElementById('m-price').innerText = "السعر: " + f.p;
+                document.getElementById('m-price').innerText = "السعر الإجمالي: " + f.p;
                 document.getElementById('step-1').style.display = 'block';
                 document.getElementById('step-2').style.display = 'none';
                 document.getElementById('bookingModal').style.display = 'flex';
             };
-            card.innerHTML = `<div class="img-wrapper"><img src="https://via.placeholder.com/300x300?text=Flower+${f.id}"></div><div class="info"><span class="name">${f.n}</span><span class="price">${f.p}</span></div>`;
+            card.innerHTML = `
+                <div class="img-wrapper"><img src="https://via.placeholder.com/300x300?text=Flower+${f.id}"></div>
+                <div class="info">
+                    <span class="name">${f.n}</span>
+                    <span class="price">${f.p}</span>
+                </div>
+            `;
             list.appendChild(card);
         });
 
@@ -101,35 +120,36 @@
         function showStep2() { document.getElementById('step-1').style.display = 'none'; document.getElementById('step-2').style.display = 'block'; }
 
         async function processBooking() {
-            const file = document.getElementById('receiptFile').files[0];
-            const phone = localStorage.getItem('loggedPhone');
+            const senderPhone = document.getElementById('senderPhone').value.trim();
+            const customerPhone = localStorage.getItem('loggedPhone');
             const btn = document.getElementById('finalBtn');
 
-            if (!phone) { alert("من فضلك سجلي دخول أولاً"); return; }
-            if (!file) { alert("ارفعي صورة الإيصال"); return; }
+            if (!customerPhone) { alert("من فضلكِ سجلي دخولك أولاً"); return; }
+            if (senderPhone.length < 11) { alert("اكتبي رقم محفظة صحيح"); return; }
 
             btn.disabled = true;
-            btn.innerText = "جاري المعالجة...";
+            btn.innerText = "جاري الإرسال...";
 
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async () => {
-                try {
-                    await db.collection("pending_payments").add({
-                        partnerId: "f01", // كود محل الورد الموحد
-                        itemName: selectedFlower.n,
-                        partnerName: "Rose Garden",
-                        customerPhone: phone,
-                        receiptBase64: reader.result,
-                        type: "محل ورد",
-                        status: "انتظار مراجعة الموظف",
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    alert("تم إرسال طلبك! الموظف هيراجع الإيصال ويأكد حجز البوكيه مع المحل.");
-                    closeModal();
-                } catch (e) { alert("خطأ: " + e.message); }
-                finally { btn.disabled = false; btn.innerText = "إرسال الإيصال للمراجعة ✅"; }
-            };
+            try {
+                await db.collection("pending_payments").add({
+                    partnerId: "f01", 
+                    partnerName: "Rose Garden",
+                    itemName: selectedFlower.n,
+                    customerPhone: customerPhone,
+                    transferFrom: senderPhone,
+                    type: "محل ورد",
+                    amount: 100,
+                    status: "انتظار مراجعة الموظف",
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("تم إرسال طلبك! الموظف سيراجع التحويل ويأكد حجز البوكيه مع المحل.");
+                closeModal();
+            } catch (e) { 
+                alert("خطأ: " + e.message); 
+            } finally { 
+                btn.disabled = false; 
+                btn.innerText = "تأكيد الحجز للمراجعة ✅"; 
+            }
         }
     </script>
 </body>
