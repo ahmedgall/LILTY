@@ -11,7 +11,7 @@ body {
     /* ألوان بناتي متداخلة (تدرج انسيابي) */
     background: linear-gradient(135deg, #FFF0F5 0%, #FFD1DC 50%, #FFB6C1 100%);
     background-attachment: fixed;
-    min-height: 180vh;
+    min-height: 150vh;
     
 
 }
