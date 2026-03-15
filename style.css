@@ -11,7 +11,7 @@ body {
     /* ألوان بناتي متداخلة (تدرج انسيابي) */
     background: linear-gradient(135deg, #FFF0F5 0%, #FFD1DC 50%, #FFB6C1 100%);
     background-attachment: fixed;
-    min-height: 200vh;
+    min-height: 265vh;
     
 
 }
@@ -368,54 +368,6 @@ body {
 
 
 
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 70px;
-    background-color: #ffffff;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
-    border-top: 1px solid #eee;
-    z-index: 1000;
-}
-
-.nav-item {
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #a0a0a0; /* لون الرموز العادي */
-    font-family: 'Cairo', sans-serif;
-    font-size: 11px;
-    transition: all 0.3s ease;
-}
-
-/* حجم الـ SVG */
-.nav-item svg {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 4px;
-}
-
-/* اللون عند التفعيل (اللون البينك الخاص ببرنامج ليلتي) */
-.nav-item.active {
-    color: #e91e63;
-}
-
-.nav-item.active svg {
-    stroke: #e91e63; /* يغير لون حدود الـ SVG */
-}
-
-/* حركة بسيطة عند الضغط */
-.nav-item:active {
-    transform: scale(0.9);
-}
-
-
 .services-grid {
     display: grid;
     /* التعديل هنا: حذف كلمة round */
@@ -436,25 +388,6 @@ body {
 
 
 
-
-
-
-
-.bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(#eee);
-            height: 75px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.11);
-            border-top-left-radius: 25px;
-            border-top-right-radius: 25px;
-            z-index: 1000;
-        }
 
 
 
